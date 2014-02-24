@@ -36,15 +36,14 @@ class CourseInfoTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase):
 
 @override_settings(MODULESTORE=TEST_DATA_MIXED_MODULESTORE)
 class CourseInfoTestCaseXML(LoginEnrollmentTestCase, ModuleStoreTestCase):
-    def setUp(self):
-        # The following XML test course (which lives at common/test/data/2014)
-        # is closed; we're testing that a course info page still appears when
-        # the course is already closed
-        self.xml_course_id = 'edX/detached_pages/2014'
+    # The following XML test course (which lives at common/test/data/2014)
+    # is closed; we're testing that a course info page still appears when
+    # the course is already closed
+    self.xml_course_id = 'edX/detached_pages/2014'
 
-        # this text appears in that course's course info page
-        # common/test/data/2014/info/updates.html
-        self.xml_data = "course info 463139"
+    # this text appears in that course's course info page
+    # common/test/data/2014/info/updates.html
+    self.xml_data = "course info 463139"
 
     @mock.patch.dict('django.conf.settings.FEATURES', {'DISABLE_START_DATES': False})
     def test_logged_in_xml(self):

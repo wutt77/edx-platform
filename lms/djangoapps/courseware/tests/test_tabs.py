@@ -172,16 +172,15 @@ class StaticTabDateTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase):
 
 @override_settings(MODULESTORE=TEST_DATA_MIXED_MODULESTORE)
 class StaticTabDateTestCaseXML(LoginEnrollmentTestCase, ModuleStoreTestCase):
-    def setUp(self):
-        # The following XML test course (which lives at common/test/data/2014)
-        # is closed; we're testing that tabs still appear when
-        # the course is already closed
-        self.xml_course_id = 'edX/detached_pages/2014'
+    # The following XML test course (which lives at common/test/data/2014)
+    # is closed; we're testing that tabs still appear when
+    # the course is already closed
+    self.xml_course_id = 'edX/detached_pages/2014'
 
-        # this text appears in the test course's tab
-        # common/test/data/2014/tabs/8e4cce2b4aaf4ba28b1220804619e41f.html
-        self.xml_data = "static 463139"
-        self.xml_url = "8e4cce2b4aaf4ba28b1220804619e41f"
+    # this text appears in the test course's tab
+    # common/test/data/2014/tabs/8e4cce2b4aaf4ba28b1220804619e41f.html
+    self.xml_data = "static 463139"
+    self.xml_url = "8e4cce2b4aaf4ba28b1220804619e41f"
 
     @patch.dict('django.conf.settings.FEATURES', {'DISABLE_START_DATES': False})
     def test_logged_in_xml(self):

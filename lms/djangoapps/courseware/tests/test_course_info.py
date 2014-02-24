@@ -43,6 +43,7 @@ class CourseInfoTestCaseXML(LoginEnrollmentTestCase, ModuleStoreTestCase):
         self.xml_course_id = 'edX/detached_pages/2014'
 
         # this text appears in that course's course info page
+        # common/test/data/2014/info/updates.html
         self.xml_data = "course info 463139"
 
     @mock.patch.dict('django.conf.settings.FEATURES', {'DISABLE_START_DATES': False})

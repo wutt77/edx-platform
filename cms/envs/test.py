@@ -17,9 +17,8 @@ import os
 from path import path
 from warnings import filterwarnings
 
-# Note: this wiki setting is also configured in the lms.envs.test.py file.
-# For a consistent user experience, both values should be updated together.
-WIKI_ENABLED = True
+# import settings from LMS for consistent behavior with CMS
+from lms.envs.test import (WIKI_ENABLED)
 
 # Nose Test Runner
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'

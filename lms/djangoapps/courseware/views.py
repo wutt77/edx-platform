@@ -22,11 +22,11 @@ from courseware.access import has_access
 from courseware.courses import get_courses, get_course_with_access, sort_by_announcement
 from courseware.masquerade import setup_masquerade
 from courseware.model_data import FieldDataCache
-from .module_render import toc_for_course, get_module_for_descriptor
+from .module_render import toc_for_course, get_module_for_descriptor, get_module
 from courseware.models import StudentModule, StudentModuleHistory
-from courseware.tabs import get_static_tab_contents
 from course_modes.models import CourseMode
 
+from open_ended_grading import open_ended_notifications
 from student.models import UserTestGroup, CourseEnrollment
 from student.views import course_from_id, single_course_reverification_info
 from util.cache import cache, cache_if_anonymous
@@ -36,7 +36,7 @@ from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import InvalidLocationError, ItemNotFoundError, NoPathToItem
 from xmodule.modulestore.search import path_to_location
 from xmodule.course_module import CourseDescriptor
-from xmodule.tabs import CourseTabList
+from xmodule.tabs import CourseTabList, StaffGradingTab, PeerGradingTab, OpenEndedGradingTab
 import shoppingcart
 
 from microsite_configuration import microsite
@@ -484,7 +484,7 @@ def static_tab(request, course_id, tab_slug):
     if tab is None:
         raise Http404
 
-    contents = get_static_tab_contents(
+    contents = _get_static_tab_contents(
         request,
         course,
         tab
@@ -743,3 +743,46 @@ def submission_history(request, course_id, student_username, location):
     }
 
     return render_to_response('courseware/submission_history.html', context)
+
+def notification_image_for_tab(course_tab, user, course):
+    """
+    Returns the notification image path for the given course_tab if applicable, otherwise None.
+    """
+
+    tab_notification_handlers = {
+        StaffGradingTab.type: open_ended_notifications.staff_grading_notifications,
+        PeerGradingTab.type: open_ended_notifications.peer_grading_notifications,
+        OpenEndedGradingTab.type: open_ended_notifications.combined_notifications
+    }
+
+    if course_tab.type in tab_notification_handlers:
+        notifications = tab_notification_handlers[course_tab.type](course, user)
+        if notifications and notifications['pending_grading']:
+            return notifications['img_path']
+
+    return None
+
+def _get_static_tab_contents(request, course, static_tab):
+    """
+    Returns the contents for the given static_tab
+    """
+    loc = Location(
+        course.location.tag,
+        course.location.org,
+        course.location.course,
+        static_tab.type,
+        static_tab.url_slug
+    )
+    field_data_cache = FieldDataCache.cache_for_descriptor_descendents(course.id,
+        request.user, modulestore().get_instance(course.id, loc), depth=0)
+    tab_module = get_module(request.user, request, loc, field_data_cache, course.id,
+                            static_asset_path=course.static_asset_path)
+
+    logging.debug('course_module = {0}'.format(tab_module))
+
+    html = ''
+
+    if tab_module is not None:
+        html = tab_module.render('student_view').content
+
+    return html

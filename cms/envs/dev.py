@@ -8,6 +8,9 @@ This config file runs the simplest dev environment"""
 from .common import *
 from logsettings import get_logger_config
 
+# import settings from LMS for consistent behavior with CMS
+from lms.envs.dev import (WIKI_ENABLED)
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 LOGGING = get_logger_config(ENV_ROOT / "log",
@@ -15,10 +18,6 @@ LOGGING = get_logger_config(ENV_ROOT / "log",
                             tracking_filename="tracking.log",
                             dev_env=True,
                             debug=True)
-
-# Note: this wiki setting is also configured in the lms.envs.dev.py file.
-# For a consistent user experience, both values should be updated together.
-WIKI_ENABLED = True
 
 modulestore_options = {
     'default_class': 'xmodule.raw_module.RawDescriptor',

@@ -201,7 +201,7 @@ class AuthenticatedCourseTab(CourseTab):
         return is_user_authenticated
 
 
-class StaffTab(CourseTab):
+class StaffTab(AuthenticatedCourseTab):
     """
     Abstract class for tabs that can be accessed by only users with staff access.
     """
@@ -442,12 +442,12 @@ class SingleTextbookTab(CourseTab):
         raise NotImplementedError('SingleTextbookTab should not be serialized.')
 
 
-class TextbookTabsType(AuthenticatedCourseTab):
+class TextbookTabsBase(AuthenticatedCourseTab):
     """
     Abstract class for textbook collection tabs classes.
     """
     def __init__(self, tab=None):  # pylint: disable=unused-argument
-        super(TextbookTabsType, self).__init__('', '', '')
+        super(TextbookTabsBase, self).__init__('', '', '')
 
     @abstractmethod
     def books(self, course):
@@ -458,7 +458,7 @@ class TextbookTabsType(AuthenticatedCourseTab):
         pass
 
 
-class TextbookTabs(TextbookTabsType):
+class TextbookTabs(TextbookTabsBase):
     """
     A tab representing the collection of all textbook tabs.
     """
@@ -476,7 +476,7 @@ class TextbookTabs(TextbookTabsType):
             )
 
 
-class PDFTextbookTabs(TextbookTabsType):
+class PDFTextbookTabs(TextbookTabsBase):
     """
     A tab representing the collection of all PDF textbook tabs.
     """
@@ -491,7 +491,7 @@ class PDFTextbookTabs(TextbookTabsType):
             )
 
 
-class HtmlTextbookTabs(TextbookTabsType):
+class HtmlTextbookTabs(TextbookTabsBase):
     """
     A tab representing the collection of all Html textbook tabs.
     """
@@ -690,7 +690,7 @@ class CourseTabList(List):
         """
         for tab in course.tabs:
             if tab.can_display(course, is_user_authenticated, is_user_staff):
-                if isinstance(tab, TextbookTabsType):
+                if isinstance(tab, TextbookTabsBase):
                     for book in tab.books(course):
                         yield book
                 else:
@@ -726,7 +726,14 @@ class CourseTabList(List):
                 "Expected second tab to have type 'course_info'.  tabs: '{0}'".format(tabs))
 
         # the following tabs should appear only once
-        for tab_type in [CoursewareTab.type, CourseInfoTab.type, NotesTab.type]:
+        for tab_type in [
+            CoursewareTab.type,
+            CourseInfoTab.type,
+            NotesTab.type,
+            TextbookTabs.type,
+            PDFTextbookTabs.type,
+            HtmlTextbookTabs.type,
+        ]:
             cls._validate_num_tabs_of_type(tabs, tab_type, 1)
 
     @staticmethod

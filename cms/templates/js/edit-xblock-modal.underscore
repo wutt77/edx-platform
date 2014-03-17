@@ -6,7 +6,13 @@
  role="dialog">
     <div class="dialog confirm">
         <form class="edit-xblock-modal" action="#">
-            <h2 class="title dialog-edit-sectionrelease-title"><%= gettext("Edit Component") %></h2>
+            <div class="modal-header">
+                <h2 class="title dialog-edit-sectionrelease-title"><%= gettext("Edit Component") %></h2>
+                <ul class="action-list">
+                    <li class="action-item">Editor</li>
+                    <li class="action-item">Settings</li>
+                </ul>
+            </div>
             <div class="form-content">
                 <div class="xblock-editor"></div>
             </div>

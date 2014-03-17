@@ -39,11 +39,11 @@ class AboutTestCaseXML(LoginEnrollmentTestCase, ModuleStoreTestCase):
     # The following XML test course (which lives at common/test/data/2014)
     # is closed; we're testing that an about page still appears when
     # the course is already closed
-    self.xml_course_id = 'edX/detached_pages/2014'
+    course_id = 'edX/detached_pages/2014'
 
     # this text appears in that course's about page
     # common/test/data/2014/about/overview.html
-    self.xml_data = "about page 463139"
+    data = "about page 463139"
 
     @mock.patch.dict('django.conf.settings.FEATURES', {'DISABLE_START_DATES': False})
     def test_logged_in_xml(self):

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 #pylint: disable=C0111
 
-from lettuce import world, step
-import os
+from lettuce import world, step, before
 import json
+import os
 import time
 import requests
-from common import i_am_registered_for_the_course, section_location, visit_scenario_item
+from common import i_am_registered_for_the_course, visit_scenario_item
 from django.utils.translation import ugettext as _
 from django.conf import settings
 from cache_toolbox.core import del_cached_content
@@ -45,7 +45,10 @@ VIDEO_MENUS = {
 }
 
 coursenum = 'test_course'
-sequence = {}
+
+@before.each_scenario
+def setUp(scenario):
+    world.video_sequences = {}
 
 
 class ReuqestHandlerWithSessionId(object):
@@ -86,18 +89,17 @@ class ReuqestHandlerWithSessionId(object):
             return True
         return False
 
-def add_video_to_course(course, player_mode, hashes, display_name='Video'):
+def get_metadata(parent_location, player_mode, metadata=None, display_name='Video'):
     category = 'video'
-
     kwargs = {
-        'parent_location': section_location(course),
+        'parent_location': parent_location,
         'category': category,
         'display_name': display_name,
         'metadata': {},
     }
 
-    if hashes:
-        kwargs['metadata'].update(hashes[0])
+    if metadata:
+         kwargs['metadata'].update(metadata)
 
     conversions = {
         'transcripts': json.loads,
@@ -134,17 +136,43 @@ def add_video_to_course(course, player_mode, hashes, display_name='Video'):
             'html5_sources': HTML5_SOURCES_INCORRECT
         })
 
-    world.scenario_dict['VIDEO'] = world.ItemFactory.create(**kwargs)
+    return kwargs
 
-
-def _get_sjson_filename(videoId, lang):
-    if lang == 'en':
-        return 'subs_{0}.srt.sjson'.format(videoId)
+def add_video_to_course(course, player_mode, hashes, display_name='Video', position=None):
+    name = display_name
+    if position and position in world.video_sequences.values():
+        parent_location = vertical_location(course, position)
     else:
-        return '{0}_subs_{1}.srt.sjson'.format(lang, videoId)
+        parent_location = add_vertical_to_course(course, position)
+
+    if hashes:
+        for index, item in enumerate(hashes):
+            if isinstance(display_name, dict):
+                name = display_name.keys()[index]
+
+            kwargs = get_metadata(parent_location, player_mode, metadata=item, display_name=name)
+            world.scenario_dict['VIDEO'] = world.ItemFactory.create(**kwargs)
+    else:
+        if isinstance(display_name, dict):
+            name = display_name.keys()[0]
+        kwargs = get_metadata(parent_location, player_mode, display_name=name)
+        world.scenario_dict['VIDEO'] = world.ItemFactory.create(**kwargs)
+
+def add_vertical_to_course(course_num, position):
+    world.scenario_dict['VERTICAL'] = world.ItemFactory.create(
+        parent_location=world.scenario_dict['SECTION'].location,
+        category='vertical',
+        display_name='Test Vertical-{}'.format(position),
+    )
+
+    return vertical_location(course_num, position)
 
 
-def _upload_file(filename, location):
+def vertical_location(course_num, position):
+    return world.scenario_dict['VERTICAL'].location._replace(course=course_num)
+
+
+def upload_file(filename, location):
     path = os.path.join(TEST_ROOT, 'uploads/', filename)
     f = open(os.path.abspath(path))
     mime_type = "application/json"
@@ -157,27 +185,28 @@ def _upload_file(filename, location):
     del_cached_content(content.location)
 
 
-def _navigate_to_an_item_in_a_sequence(number):
+def navigate_to_an_item_in_a_sequence(number):
     sequence_css = '#sequence-list a[data-element="{0}"]'.format(number)
     world.css_click(sequence_css)
 
 
-def _change_video_speed(speed):
+def change_video_speed(speed):
     world.browser.execute_script("$('.speeds').addClass('open')")
     speed_css = 'li[data-speed="{0}"] a'.format(speed)
     world.css_click(speed_css)
 
-def _open_menu(menu):
+
+def open_menu(menu):
     world.browser.execute_script("$('{selector}').parent().addClass('open')".format(
         selector=VIDEO_MENUS[menu]
     ))
 
 
-def _get_all_dimensions():
-    video = _get_dimensions('.video-player iframe, .video-player video')
-    wrapper = _get_dimensions('.tc-wrapper')
-    controls = _get_dimensions('.video-controls')
-    progress_slider = _get_dimensions('.video-controls > .slider')
+def get_all_dimensions():
+    video = get_dimensions('.video-player iframe, .video-player video')
+    wrapper = get_dimensions('.tc-wrapper')
+    controls = get_dimensions('.video-controls')
+    progress_slider = get_dimensions('.video-controls > .slider')
 
     expected = dict(wrapper)
     expected['height'] -= controls['height'] + 0.5 * progress_slider['height']
@@ -185,30 +214,30 @@ def _get_all_dimensions():
     return (video, expected)
 
 
-def _get_dimensions(selector):
+def get_dimensions(selector):
     element = world.css_find(selector).first
     return element._element.size
 
 
-def _get_window_dimensions():
+def get_window_dimensions():
     return world.browser.driver.get_window_size()
 
 
-def _set_window_dimensions(width, height):
+def set_window_dimensions(width, height):
     world.browser.driver.set_window_size(width, height)
     # Wait 200 ms when JS finish resizing
     world.wait(0.2)
 
 
-def _duration():
+def duration():
         """
         Total duration of the video, in seconds.
         """
-        elapsed_time, duration = _video_time()
+        elapsed_time, duration = video_time()
         return duration
 
 
-def _video_time():
+def video_time():
         """
         Return a tuple `(elapsed_time, duration)`, each in seconds.
         """
@@ -219,10 +248,10 @@ def _video_time():
         elapsed_str, duration_str = full_time.split(' / ')
 
         # Convert each string to seconds
-        return (_parse_time_str(elapsed_str), _parse_time_str(duration_str))
+        return (parse_time_str(elapsed_str), parse_time_str(duration_str))
 
 
-def _parse_time_str(time_str):
+def parse_time_str(time_str):
     """
     Parse a string of the form 1:23 into seconds (int).
     """
@@ -235,7 +264,7 @@ def does_not_autoplay(_step, video_type):
     assert(world.css_find('.%s' % video_type)[0]['data-autoplay'] == 'False')
 
 
-@step('the course has a Video component in (.*) mode(?:\:)?$')
+@step('the course has a Video component in "([^"]*)" mode(?:\:)?$')
 def view_video(_step, player_mode):
     i_am_registered_for_the_course(_step, coursenum)
     add_video_to_course(coursenum, player_mode.lower(), _step.hashes)
@@ -248,10 +277,11 @@ def add_video(_step, player_mode):
     visit_scenario_item('SECTION')
 
 
-@step('a video "([^"]*)" in "([^"]*)" mode in position "([^"]*)" of sequential(?:\:)?$')
+@step('video(?:s)? "([^"]*)" in "([^"]*)" mode in position "([^"]*)" of sequential(?:\:)?$')
 def add_video_in_position(_step, player_id, player_mode, position):
-    sequence[player_id] = position
-    add_video_to_course(coursenum, player_mode.lower(), _step.hashes, display_name=player_id)
+    sequences = {i.strip(): position for i in player_id.split(',')}
+    add_video_to_course(coursenum, player_mode.lower(), _step.hashes, display_name=sequences, position=position)
+    world.video_sequences.update(sequences)
 
 
 @step('I open the section with videos$')
@@ -260,19 +290,19 @@ def visit_video_section(_step):
 
 
 @step('I select the "([^"]*)" speed$')
-def change_video_speed(_step, speed):
-      _change_video_speed(speed)
+def i_select_video_speed(_step, speed):
+      change_video_speed(speed)
 
 
 @step('I select the "([^"]*)" speed on video "([^"]*)"$')
 def change_video_speed_on_video(_step, speed, player_id):
-      _navigate_to_an_item_in_a_sequence(sequence[player_id])
-      _change_video_speed(speed)
+      navigate_to_an_item_in_a_sequence(world.video_sequences[player_id])
+      change_video_speed(speed)
 
 
 @step('I open video "([^"]*)"$')
 def open_video(_step, player_id):
-    _navigate_to_an_item_in_a_sequence(sequence[player_id])
+    navigate_to_an_item_in_a_sequence(world.video_sequences[player_id])
 
 
 @step('video "([^"]*)" should start playing at speed "([^"]*)"$')
@@ -286,7 +316,7 @@ def set_youtube_response_timeout(_step, time):
     world.youtube.config['time_to_response'] = float(time)
 
 
-@step('when I view the video it has rendered in (.*) mode$')
+@step('the video has rendered in "([^"]*)" mode$')
 def video_is_rendered(_step, mode):
     modes = {
         'html5': 'video',
@@ -294,6 +324,20 @@ def video_is_rendered(_step, mode):
     }
     html_tag = modes[mode.lower()]
     assert world.css_find('.video {0}'.format(html_tag)).first
+    assert world.is_css_present('.speed_link')
+
+
+@step('videos have rendered in "([^"]*)" mode$')
+def videos_are_rendered(_step, mode):
+    modes = {
+        'html5': 'video',
+        'youtube': 'iframe'
+    }
+    html_tag = modes[mode.lower()]
+
+    actual = len(world.css_find('.video {0}'.format(html_tag)))
+    expected = len(world.css_find('.xmodule_VideoModule'))
+    assert actual == expected
     assert world.is_css_present('.speed_link')
 
 
@@ -331,7 +375,7 @@ def set_captions_visibility_state(_step, captions_state):
 
 @step('I see video menu "([^"]*)" with correct items$')
 def i_see_menu(_step, menu):
-    _open_menu(menu)
+    open_menu(menu)
     menu_items = world.css_find(VIDEO_MENUS[menu] + ' li')
     video = world.scenario_dict['VIDEO']
     transcripts = dict(video.transcripts)
@@ -355,7 +399,7 @@ def check_text_in_the_captions(_step, text):
 
 @step('I select language with code "([^"]*)"$')
 def select_language(_step, code):
-    _open_menu("language")
+    open_menu("language")
     selector = VIDEO_MENUS["language"] + ' li[data-lang-code={code}]'.format(
         code=code
     )
@@ -384,7 +428,7 @@ def start_playing_video_from_n_seconds(_step, position):
 @step('I see duration "([^"]*)"$')
 def i_see_duration(_step, position):
     world.wait_for(
-        func=lambda _: _duration() == _parse_time_str(position),
+        func=lambda _: duration() == parse_time_str(position),
         timeout=5
     )
 
@@ -398,7 +442,7 @@ def seek_video_to_n_seconds(_step, seconds):
 
 @step('I have a "([^"]*)" transcript file in assets$')
 def upload_to_assets(_step, filename):
-    _upload_file(filename, world.scenario_dict['COURSE'].location)
+    upload_file(filename, world.scenario_dict['COURSE'].location)
 
 
 @step('button "([^"]*)" is hidden$')
@@ -415,20 +459,20 @@ def is_hidden_menu(_step, menu):
 def video_alignment(_step, transcript_visibility):
     # Width of the video container in css equal 75% of window if transcript enabled
     wrapper_width = 75 if transcript_visibility == "with" else 100
-    initial = _get_window_dimensions()
+    initial = get_window_dimensions()
 
-    _set_window_dimensions(300, 600)
-    real, expected = _get_all_dimensions()
+    set_window_dimensions(300, 600)
+    real, expected = get_all_dimensions()
 
     width = round(100 * real['width']/expected['width']) == wrapper_width
 
-    _set_window_dimensions(600, 300)
-    real, expected = _get_all_dimensions()
+    set_window_dimensions(600, 300)
+    real, expected = get_all_dimensions()
 
     height = abs(expected['height'] - real['height']) <= 5
 
     # Restore initial window size
-    _set_window_dimensions(
+    set_window_dimensions(
         initial['width'], initial['height']
     )
 
@@ -469,3 +513,12 @@ def select_transcript_format(_step, format):
 
     assert world.css_find(menu_selector + ' .active a')[0]['data-value'] == format
     assert button.text.strip() == '.' + format
+
+
+@step('video (.*) show the captions$')
+def shows_captions(_step, show_captions):
+    if 'not' in show_captions or 'n\'t' in show_captions:
+        assert world.is_css_present('div.video.closed')
+    else:
+        assert world.is_css_not_present('div.video.closed')
+

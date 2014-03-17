@@ -9,7 +9,6 @@ valid, and a generator function that takes the config, user, and course, and
 actually generates the CourseTab.
 """
 
-from collections import namedtuple
 import logging
 
 from .module_render import get_module
@@ -23,9 +22,9 @@ log = logging.getLogger(__name__)
 
 
 def image_for_tab(course_tab, user, course):
-    '''
+    """
     Returns the image path for the given course_tab if applicable, otherwise None.
-    '''
+    """
     if isinstance(course_tab, GradingTab):
         if isinstance(course_tab, StaffGradingTab):
             notifications = open_ended_notifications.staff_grading_notifications(course, user)
@@ -44,11 +43,13 @@ def image_for_tab(course_tab, user, course):
 
 
 def get_static_tab_contents(request, course, static_tab):
-    '''
+    """
     Returns the contents for the given static_tab
-    '''
+    """
     loc = Location(
-        course.location.tag, course.location.org, course.location.course,
+        course.location.tag,
+        course.location.org,
+        course.location.course,
         static_tab.type,
         static_tab.url_slug
     )

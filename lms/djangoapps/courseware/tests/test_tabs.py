@@ -13,20 +13,22 @@ from courseware.tests.modulestore_config import TEST_DATA_MIXED_MODULESTORE
 from .helpers import LoginEnrollmentTestCase
 
 class TabTestCase(TestCase):
-    '''Base class for Tab-related test cases.'''
+    """Base class for Tab-related test cases."""
     def setUp(self):
 
         self.course = MagicMock()
         self.course.id = 'edX/toy/2012_Fall'
 
     def check_tab(
-            self, tab_class, dict_tab,
+            self,
+            tab_class,
+            dict_tab,
             expected_link,
             expected_tab_id,
-            incorrect_tab_id='nope',
+            incorrect_tab_id='fake_tab_id',
             expected_name='same',
-            invalid_dict_tab={'none': 'wrong'},
-            can_display=True
+            invalid_dict_tab={'fake_tab_key': 'fake_tab_value'},
+            expected_can_display_value=True
     ):
         # create tab
         tab = tab_class(dict_tab)
@@ -37,17 +39,17 @@ class TabTestCase(TestCase):
         # link is as expected
         self.assertEqual(tab.link_func(self.course), expected_link)
 
-        # active page name
+        # verify active page name
         self.assertTrue(tab.tab_id == expected_tab_id)
         self.assertFalse(tab.tab_id == incorrect_tab_id)
 
-        # can display
+        # verify that the can_display return value is as expected
         self.assertEqual(
             tab.can_display(self.course, is_user_authenticated=True, is_user_staff=True),
-            can_display
+            expected_can_display_value
         )
 
-        # validate
+        # validate tab
         self.assertTrue(tab.validate(dict_tab))
         if invalid_dict_tab:
             self.assertRaises(tabs.InvalidTabsException, tab.validate, invalid_dict_tab)
@@ -57,7 +59,7 @@ class TabTestCase(TestCase):
 
 
 class TabEqualityTestCase(TestCase):
-    '''Test cases for tab equality - especially for tabs that override the __eq__ method.'''
+    """Test cases for tab equality - especially for tabs that override the __eq__ method."""
 
     def test_courseware_tab_equality(self):
         tab1 = tabs.CoursewareTab()
@@ -85,7 +87,7 @@ class TabEqualityTestCase(TestCase):
 
 
 class ProgressTestCase(TabTestCase):
-    '''Test cases for Progress Tab.'''
+    """Test cases for Progress Tab."""
 
     def test_progress(self):
 
@@ -110,7 +112,7 @@ class ProgressTestCase(TabTestCase):
 
 
 class WikiTestCase(TabTestCase):
-    '''Test cases for Wiki Tab.'''
+    """Test cases for Wiki Tab."""
 
     @override_settings(WIKI_ENABLED=True)
     def test_wiki_enabled(self):
@@ -136,7 +138,7 @@ class WikiTestCase(TabTestCase):
 
 
 class ExternalLinkTestCase(TabTestCase):
-    '''Test cases for External Link Tab.'''
+    """Test cases for External Link Tab."""
 
     def test_external_link(self):
 
@@ -207,7 +209,7 @@ class StaticTabDateTestCase(LoginEnrollmentTestCase, ModuleStoreTestCase):
 
 
 class TextbooksTestCase(TabTestCase):
-    '''Test cases for Textbook Tab.'''
+    """Test cases for Textbook Tab."""
 
     def setUp(self):
         super(TextbooksTestCase, self).setUp()
@@ -239,7 +241,7 @@ class TextbooksTestCase(TabTestCase):
 
 
 class KeyCheckerTestCase(TestCase):
-    '''Test cases for KeyChecker class'''
+    """Test cases for KeyChecker class"""
 
     def setUp(self):
 
@@ -255,7 +257,7 @@ class KeyCheckerTestCase(TestCase):
 
 
 class NeedNameTestCase(TestCase):
-    '''Test cases for NeedName validator'''
+    """Test cases for NeedName validator"""
 
     def setUp(self):
 
@@ -272,7 +274,7 @@ class NeedNameTestCase(TestCase):
 
 
 class ValidateTabsTestCase(TestCase):
-    '''Test cases for validating tabs.'''
+    """Test cases for validating tabs."""
 
     def setUp(self):
 
@@ -321,7 +323,7 @@ class ValidateTabsTestCase(TestCase):
 
 @override_settings(MODULESTORE=TEST_DATA_MIXED_MODULESTORE)
 class DiscussionLinkTestCase(ModuleStoreTestCase):
-    '''Test cases for discussion link tab.'''
+    """Test cases for discussion link tab."""
 
     def setUp(self):
         self.tabs_with_discussion = [
@@ -338,9 +340,9 @@ class DiscussionLinkTestCase(ModuleStoreTestCase):
 
     @staticmethod
     def _patch_reverse(course):
-        '''Allows tests to override the reverse function'''
+        """Allows tests to override the reverse function"""
         def patched_reverse(viewname, args):
-            '''Function to override the reverse function'''
+            """Function to override the reverse function"""
             if viewname == "django_comment_client.forum.views.forum_form_discussion" and args == [course.id]:
                 return "default_discussion_link"
             else:
@@ -363,7 +365,8 @@ class DiscussionLinkTestCase(ModuleStoreTestCase):
             self.assertTrue(
                 discussion is None or
                 (not discussion.can_display(course, True, True)) or
-                (discussion.link_func(course) is None))
+                (discussion.link_func(course) is None)
+            )
 
     @patch.dict("django.conf.settings.FEATURES", {"ENABLE_DISCUSSION_SERVICE": True})
     def test_no_tabs(self):

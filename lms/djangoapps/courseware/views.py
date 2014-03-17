@@ -97,10 +97,12 @@ def render_accordion(request, course, chapter, section, field_data_cache):
     request.user = user	# keep just one instance of User
     toc = toc_for_course(user, request, course, chapter, section, field_data_cache)
 
-    context = dict([('toc', toc),
-                    ('course_id', course.id),
-                    ('csrf', csrf(request)['csrf_token']),
-                    ('due_date_display_format', course.due_date_display_format)] + template_imports.items())
+    context = dict([
+        ('toc', toc),
+        ('course_id', course.id),
+        ('csrf', csrf(request)['csrf_token']),
+        ('due_date_display_format', course.due_date_display_format)
+    ] + template_imports.items())
     return render_to_string('courseware/accordion.html', context)
 
 
@@ -268,7 +270,7 @@ def index(request, course_id, chapter=None, section=None,
             'masquerade': masq,
             'xqa_server': settings.FEATURES.get('USE_XQA_SERVER', 'http://xqa:server@content-qa.mitx.mit.edu/xqa'),
             'reverifications': fetch_reverify_banner_info(request, course_id),
-            }
+        }
 
         # Only show the chat if it's enabled by the course and in the
         # settings.
@@ -363,16 +365,17 @@ def index(request, course_id, chapter=None, section=None,
             log.exception("Error in index view: user={user}, course={course},"
                           " chapter={chapter} section={section}"
                           "position={position}".format(
-                              user=user,
-                              course=course,
-                              chapter=chapter,
-                              section=section,
-                              position=position
-                              ))
+                user=user,
+                course=course,
+                chapter=chapter,
+                section=section,
+                position=position
+            ))
             try:
-                result = render_to_response('courseware/courseware-error.html',
-                                            {'staff_access': staff_access,
-                                            'course': course})
+                result = render_to_response('courseware/courseware-error.html', {
+                    'staff_access': staff_access,
+                    'course': course
+                })
             except:
                 # Let the exception propagate, relying on global config to at
                 # at least return a nice error message
@@ -489,10 +492,11 @@ def static_tab(request, course_id, tab_slug):
     if contents is None:
         raise Http404
 
-    return render_to_response('courseware/static_tab.html',
-                              {'course': course,
-                               'tab': tab,
-                               'tab_contents': contents, })
+    return render_to_response('courseware/static_tab.html', {
+        'course': course,
+        'tab': tab,
+        'tab_contents': contents,
+    })
 
 # TODO arjun: remove when custom tabs in place, see courseware/syllabus.py
 
@@ -507,8 +511,10 @@ def syllabus(request, course_id):
     course = get_course_with_access(request.user, course_id, 'load')
     staff_access = has_access(request.user, course, 'staff')
 
-    return render_to_response('courseware/syllabus.html', {'course': course,
-                                            'staff_access': staff_access, })
+    return render_to_response('courseware/syllabus.html', {
+        'course': course,
+        'staff_access': staff_access,
+    })
 
 
 def registered_for_course(course, user):
@@ -562,15 +568,16 @@ def course_about(request, course_id):
     # see if we have already filled up all allowed enrollments
     is_course_full = CourseEnrollment.is_course_full(course)
 
-    return render_to_response('courseware/course_about.html',
-                              {'course': course,
-                               'registered': registered,
-                               'course_target': course_target,
-                               'registration_price': registration_price,
-                               'in_cart': in_cart,
-                               'reg_then_add_to_cart_link': reg_then_add_to_cart_link,
-                               'show_courseware_link': show_courseware_link,
-                               'is_course_full': is_course_full})
+    return render_to_response('courseware/course_about.html', {
+        'course': course,
+        'registered': registered,
+        'course_target': course_target,
+        'registration_price': registration_price,
+        'in_cart': in_cart,
+        'reg_then_add_to_cart_link': reg_then_add_to_cart_link,
+        'show_courseware_link': show_courseware_link,
+        'is_course_full': is_course_full
+    })
 
 
 @ensure_csrf_cookie
@@ -602,17 +609,14 @@ def mktg_course_about(request, course_id):
                             settings.FEATURES.get('ENABLE_LMS_MIGRATION'))
     course_modes = CourseMode.modes_for_course(course.id)
 
-    return render_to_response(
-        'courseware/mktg_course_about.html',
-        {
-            'course': course,
-            'registered': registered,
-            'allow_registration': allow_registration,
-            'course_target': course_target,
-            'show_courseware_link': show_courseware_link,
-            'course_modes': course_modes,
-        }
-    )
+    return render_to_response('courseware/mktg_course_about.html', {
+        'course': course,
+        'registered': registered,
+        'allow_registration': allow_registration,
+        'course_target': course_target,
+        'show_courseware_link': show_courseware_link,
+        'course_modes': course_modes,
+    })
 
 
 @login_required
@@ -710,9 +714,11 @@ def submission_history(request, course_id, student_username, location):
 
     try:
         student = User.objects.get(username=student_username)
-        student_module = StudentModule.objects.get(course_id=course_id,
-                                                   module_state_key=location,
-                                                   student_id=student.id)
+        student_module = StudentModule.objects.get(
+            course_id=course_id,
+            module_state_key=location,
+            student_id=student.id
+        )
     except User.DoesNotExist:
         return HttpResponse(escape("User {0} does not exist.".format(student_username)))
     except StudentModule.DoesNotExist:

@@ -105,7 +105,7 @@ def tabs_handler(request, tag=None, package_id=None, branch=None, version_guid=N
 
         static_tabs = []
         built_in_tabs = []
-        for tab in CourseTabList.iterate_displayable(course_item):
+        for tab in CourseTabList.iterate_displayable(course_item, include_instructor_tab=False):
             if isinstance(tab, StaticTab):
                 static_tab_loc = old_location.replace(category='static_tab', name=tab.url_slug)
                 static_tabs.append(modulestore('direct').get_item(static_tab_loc))

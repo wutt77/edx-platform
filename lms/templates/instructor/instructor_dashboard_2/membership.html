@@ -35,7 +35,7 @@
   </p>
 
   <div class="enroll-option">
-    <input type="checkbox" name="auto-enroll" value="Auto-Enroll" style="margin-top: 1em;">
+    <input type="checkbox" name="auto-enroll" value="Auto-Enroll">
     <label for="auto-enroll">${_("Auto Enroll")}</label>
     <div class="hint auto-enroll-hint">
       <span class="hint-caret"></span>
@@ -52,7 +52,7 @@
       <p> ${_("If this option is <em>checked</em>, users will receive an email notification.")}</p>
     </div>
   </div>
-  
+
   <div>
     <input type="button" name="enrollment-button" class="enrollment-button" value="${_("Enroll")}" data-endpoint="${ section_data['enroll_button_url'] }" data-action="enroll" >
     <input type="button" name="enrollment-button" class="enrollment-button" value="${_("Unenroll")}" data-endpoint="${ section_data['unenroll_button_url'] }" data-action="unenroll" >
@@ -64,7 +64,7 @@
 %if section_data['access']['instructor']:
 <div class="batch-beta-testers">
   <h2> ${_("Batch Beta Testers")} </h2>
-  <p> 
+  <p>
     <label for="student-emails-for-beta">
       ${_("Enter email addresses separated by new lines or commas.")}<br/>
       ${_("Note: Users must have an activated {platform_name} account before they can be enrolled as a beta tester.").format(platform_name=settings.PLATFORM_NAME)}
@@ -72,7 +72,7 @@
 
   <textarea rows="6" cols="50" name="student-emails-for-beta" placeholder="${_("Email addresses")}" spellcheck="false"></textarea>
   </p>
-  
+
   <div class="enroll-option">
     <input type="checkbox" name="email-students" value="Notify-students-by-email">
     <label for="email-students-beta">${_("Notify users by email")}</label>
@@ -81,7 +81,7 @@
       <p> ${_("If this option is <em>checked</em>, users will receive an email notification.")}</p>
     </div>
   </div>
-  
+
   <div>
     <input type="button" name="beta-testers" class="enrollment-button" value="${_("Add beta tester(s)")}" data-endpoint="${ section_data['modify_beta_testers_button_url'] }" data-action="add" >
     <input type="button" name="beta-testers" class="enrollment-button" value="${_("Remove beta tester(s)")}" data-endpoint="${ section_data['modify_beta_testers_button_url'] }" data-action="remove" >

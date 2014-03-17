@@ -8,9 +8,9 @@
         <form class="edit-xblock-modal" action="#">
             <div class="modal-header">
                 <h2 class="title dialog-edit-sectionrelease-title"><%= gettext("Edit Component") %></h2>
-                <ul class="action-list">
-                    <li class="action-item">Editor</li>
-                    <li class="action-item">Settings</li>
+                <ul class="action-list action-modes">
+                    <li class="action-item" data-mode="editor"><a href="#"><%= gettext("Editor") %></a></li>
+                    <li class="action-item" data-mode="settings"><a href="#"><%= gettext("Settings") %></a></li>
                 </ul>
             </div>
             <div class="form-content">

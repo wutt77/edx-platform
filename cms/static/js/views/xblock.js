@@ -20,11 +20,11 @@ define(["jquery", "underscore", "js/views/baseview", "xblock/runtime.v1"],
                     },
                     success: function(fragment) {
                         var wrapper = self.$el,
-                            xblock,
+                            xblockElement,
                             success = options ? options.success : null;
                         self.renderXBlockFragment(fragment, wrapper);
-                        xblock = self.$('.xblock').first();
-                        XBlock.initializeBlock(xblock);
+                        xblockElement = self.$('.xblock').first();
+                        self.xblock = XBlock.initializeBlock(xblockElement);
                         if (success) {
                             success();
                         }

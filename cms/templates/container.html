@@ -29,30 +29,27 @@ xblock_info = {
 };
 %>
 <script type='text/javascript'>
-    require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock", "js/views/edit_xblock_modal",
+    require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock", "js/views/modals/edit_xblock",
             "js/models/module_info", "coffee/src/views/unit",
             "xmodule", "coffee/src/main", "xblock/cms.runtime.v1",
             "js/views/metadata", "js/collections/metadata"],
             function(doc, $, XBlockInfo, XBlockView, EditXBlockModal) {
-                var self = this,
-                    model,
-                    view,
-                    addButtonActions;
+                var view,
+                    addButtonActions,
+                    xblockInfo;
+
+                xblockInfo = new XBlockInfo(${json.dumps(xblock_info) | n});
 
                 addButtonActions = function() {
                     $('.edit-button').click(function(event) {
                         var modal = new EditXBlockModal({el: $('.edit-xblock-modal')});
-                        modal.wrapperXBlock = $(event.target).closest('.wrapper-xblock');
-                        modal.render();
-                        modal.show();
-                        event.preventDefault();
+                        modal.edit(event, xblockInfo);
                     });
                 };
 
-                model = new XBlockInfo(${json.dumps(xblock_info) | n});
                 view = new XBlockView({
                     el: $('.wrapper-xblock.level-page').first(),
-                    model: model,
+                    model: xblockInfo,
                     view: 'container_preview'
                 });
                 view.render({ success: addButtonActions });
@@ -64,7 +61,7 @@ xblock_info = {
 <%block name="content">
 
 
-<div class="wrapper-mast wrapper">
+<div class="wrapper-mast wrapper" data-location="" data-display-name="" data-category="">
     <header class="mast has-actions has-navigation">
         <h1 class="page-header">
             <small class="navigation navigation-parents">
@@ -84,8 +81,8 @@ xblock_info = {
         <nav class="nav-actions">
             <h3 class="sr">${_("Page Actions")}</h3>
             <ul>
-                <li class="sr nav-item">
-                    ${_("No Actions")}
+                <li class="nav-item">
+                    <a href="#" class="button edit-button"><i class="icon-edit"></i> ${_("Edit")}</a>
                 </li>
             </ul>
         </nav>

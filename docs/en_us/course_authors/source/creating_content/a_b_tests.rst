@@ -37,12 +37,12 @@ When you view a unit that contains an A/B test in the LMS in the Staff view, you
 
 For example, in the following page, Group 0 is selected, and the video component that is configured to show for Group 0 is displayed:
 
-.. image:: Images/a-b-test-lms-group-0.png
+.. image:: ../Images/a-b-test-lms-group-0.png
  :alt: Image of a unit page with Group 0 selected
 
 You can change the group selection to view the video that a different group of students sees:
 
-.. image:: Images/a-b-test-lms-group-2.png
+.. image:: ../Images/a-b-test-lms-group-2.png
  :alt: Image of a unit page with Group 2 selected
 
 .. note:: The example course content in this chapter uses A/B test terminology to make the functionality clear. Typically, you do not want to use terminology in course content that would make students aware of the experiment.
@@ -61,17 +61,17 @@ The A/B test as a whole is the parent component.
 
 For example, the following unit page contains just one component, which is the A/B test. No other content is shown on the unit page.
 
-.. image:: Images/a-b-test-studio_unit_page.png
+.. image:: ../Images/a-b-test-studio_unit_page.png
  :alt: Image of a unit page in Studio and an A/B test component
 
 You see the A/B test's child components by clicking the arrow in the link above.  A read-only page then shows all the components in the A/B test:
 
-.. image:: Images/a_b_test_children.png
+.. image:: ../Images/a_b_test_children.png
  :alt: Image of the A/B test child components
 
 Click the arrow next to a test component name to expand that test to see its contents. In this example, Group A contains an HTML component and a video:
 
-.. image:: Images/a_b_test_child_expanded.png
+.. image:: ../Images/a_b_test_child_expanded.png
  :alt: Image of an expanded A/B test component
 
 

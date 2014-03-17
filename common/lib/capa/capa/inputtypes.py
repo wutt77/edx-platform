@@ -832,7 +832,7 @@ class MatlabInput(CodeInput):
             'queue_len': str(self.queue_len),
             'queue_msg': self.queue_msg,
             'button_enabled': self.button_enabled(),
-            'matlab_editor_js': '{static_url}js/vendor/CodeMirror/addons/octave.js'.format(
+            'matlab_editor_js': '{static_url}js/vendor/CodeMirror/octave.js'.format(
                 static_url=self.capa_system.STATIC_URL),
         }
         return extra_context

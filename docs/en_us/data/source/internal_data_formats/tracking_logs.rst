@@ -148,12 +148,11 @@ This section contains a table of the JSON fields that are common to the schema d
 |                           | the event, the organization that lists the course, and the  |             | fields:                            |  
 |                           | individual who is performing the action.                    |             | ``course_id``                      |
 |                           |                                                             |             | ``org_id``                         |
-|                           | The ``course_user_tags`` contains a dictionary with all of  |             | ``user_id``                        |
-|                           | the keys and values for the user from the                   |             | ``course_user_tags``               |    
-|                           | ``user_api_usercoursetag`` table. See                       |             |                                    | 
-|                           | :ref:`user_api_usercoursetag`.                              |             | These fields are blank if values   |
-|                           |                                                             |             | cannot be determined.              |
-|                           | Also contains member fields that apply to specific event    |             |                                    |
+|                           | ``course_user_tags`` contains a dictionary with the keys    |             | ``user_id``                        |
+|                           |  and values from the  ``user_api_usercoursetag`` table      |             | ``course_user_tags``               |    
+|                           |  for the user. See :ref:`user_api_usercoursetag`.           |             |                                    | 
+|                           |                                                             |             | These fields are blank if values   |
+|                           | Also contains member fields that apply to specific event    |             | cannot be determined.              |
 |                           | types only: see the description for each event type.        |             |                                    |
 |                           |                                                             |             |                                    |
 |                           | **History**: Added 23 Oct 2013; ``user_id`` added           |             |                                    |

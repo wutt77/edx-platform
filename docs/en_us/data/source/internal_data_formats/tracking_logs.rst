@@ -148,17 +148,17 @@ This section contains a table of the JSON fields that are common to the schema d
 |                           | the event, the organization that lists the course, and the  |             | fields:                            |  
 |                           | individual who is performing the action.                    |             | ``course_id``                      |
 |                           |                                                             |             | ``org_id``                         |
-|                           | Also contains member fields that apply to specific event    |             | ``user_id``                        |
-|                           | types only: see the descriptions for each event type.       |             |                                    |    
-|                           |                                                             |             | These fields are blank if values   | 
-|                           | For courses that include a module that is set up to test    |             | cannot be determined.              |
-|                           | multiple variants, all event types also include the ``key`` |             |                                    |
-|                           | and ``value`` fields from ``user_api_usercoursetag`` with   |             |                                    |
-|                           | the student's assigned partition and group.                 |             |                                    |
+|                           | The ``course_user_tags`` contains a dictionary with all of  |             | ``user_id``                        |
+|                           | the keys and values for the user from the                   |             | ``course_user_tags``               |    
+|                           | ``user_api_usercoursetag`` table. See                       |             |                                    | 
+|                           | :ref:`user_api_usercoursetag`.                              |             | These fields are blank if values   |
+|                           |                                                             |             | cannot be determined.              |
+|                           | Also contains member fields that apply to specific event    |             |                                    |
+|                           | types only: see the description for each event type.        |             |                                    |
 |                           |                                                             |             |                                    |
 |                           | **History**: Added 23 Oct 2013; ``user_id`` added           |             |                                    |
-|                           | 6 Nov 2013. Other fields may duplicate this data.           |             |                                    |
-|                           | ``key`` and ``value`` added 12 Mar 2014.                    |             |                                    |
+|                           | 6 Nov 2013. Other event fields may duplicate this data.     |             |                                    |
+|                           | ``course_user_tags`` added 12 Mar 2014.                     |             |                                    |
 +---------------------------+-------------------------------------------------------------+-------------+------------------------------------+
 | ``event``                 | Specifics of the triggered event.                           | string/JSON |                                    |
 +---------------------------+-------------------------------------------------------------+-------------+------------------------------------+
@@ -834,9 +834,14 @@ The ``staff_grading_hide_question`` and ``staff_grading_show_question`` event ty
 A/B Testing Event Types
 ==========================
 
-These event types apply to modules that are set up to randomly assign students to groups so that different module variants can be shown to the different groups. 
+Course authors can configure course content to present modules contain other modules. For example, a parent module can include two child modules with content that differs in some way for comparison testing. When a student navigates to a module that is set up for A/B testing, the student is randomly assigned to a group and shown only one of the child modules. 
 
-.. note:: For courses that include a module that is set up to test multiple variants, all event types include the ``key`` and ``value`` fields from ``user_api_usercoursetag`` to identify the student's assigned partition and group.
+.. what identifies a module as being an A/B test parent module, and triggers the partition/group assignment?
+.. why are two layers of categorization, into both partitions and groups, needed?
+
+These event types apply to modules that are set up to randomly assign students to groups so that modules with different content can be shown to the different groups. 
+
+.. note:: The common ``context`` field includes a ``course_user_tags`` field to identify the student's assigned partition and group.
 
 **History**: These event types were added on 12 Mar 2014.
 
@@ -844,7 +849,11 @@ These event types apply to modules that are set up to randomly assign students t
 ``assigned_user_to_partition``
 ----------------------------------
 
-When a student views a module that is set up to test multiple variants, the server checks for the student's assignment to a partition and group. If the student does not yet have a testing assignment, the server fires an ``assigned_user_to_partition`` event and adds a row to the ``user_api_usercoursetag`` table for the student. See :ref:`user_api_usercoursetag`. 
+When a student views a module that is set up to test the different child modules that it contains, the server checks for the student's assignment to a partition and group. If the student does not yet have a testing assignment, the server fires an ``assigned_user_to_partition`` event and adds a row to the ``user_api_usercoursetag`` table for the student. See :ref:`user_api_usercoursetag`. 
+
+A/B testing uses the partition service, which generates keys like ``xblock.partition_service.partition_$ID``, where ``$ID`` is the actual id of the group that the user was assigned to (this will just be an integer, with the metadata about the group stored on the course object).
+
+.. quoting Cale without understanding how to integrate this information better
 
 **Component**: Split Test
 
@@ -868,7 +877,7 @@ When a student views a module that is set up to test multiple variants, the serv
 ``child_render``
 ----------------------------------
 
-When a student views a module that is set up to test multiple variants, a ``child_render`` event fires to identify the variant that is shown to the student. 
+When a student views a module that is set up to test different content using child modules, a ``child_render`` event fires to identify the child module that is shown to the student. 
 
 **Component**: Split Test
 
@@ -879,8 +888,10 @@ When a student views a module that is set up to test multiple variants, a ``chil
 +---------------------+---------------+---------------------------------------------------------------------+
 | Field               | Type          | Details                                                             |
 +=====================+===============+=====================================================================+
-| ``child-id``        | string        | ID of the module variant that displays to the student.              |
+| ``child-id``        | string        | ID of the module that displays to the student.                      |
 +---------------------+---------------+---------------------------------------------------------------------+
+
+.. this might be renamed to child_id
 
 .. _Instructor_Event_Types:
 

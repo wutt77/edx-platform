@@ -142,7 +142,7 @@ The visibility of components contained by other components is handled in the sam
 
 When you view child components in Studio, the read-only page indicates that the publishing status of those components depends on the unit:
 
-.. image:: Images/container_pub_status.png
+.. image:: ../Images/container_pub_status.png
  :alt: Image of the parent component page with the publishing status message highlighted.
 
 

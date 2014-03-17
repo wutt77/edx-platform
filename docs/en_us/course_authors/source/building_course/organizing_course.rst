@@ -251,17 +251,17 @@ The component that contains other components is referred to as the parent; the c
 
 In the unit page, a parent component appears with the display name and a **VIEW** link. For example:
 
-.. image:: Images/component_container.png
+.. image:: ../Images/component_container.png
  :alt: Image of a unit page with a parent component
 
 When you click **VIEW**, the parent component page opens, showing all child components.  Breadcrumbs at the top of the page show the unit and parent component:
 
-.. image:: Images/child-components.png
+.. image:: ../Images/child-components.png
  :alt: Image of a child component page
 
 Click the arrow next to a child component name to expand that component to see its contents. In this example, Child Component A contains an HTML component and a video:
 
-.. image:: Images/child_component_a.png
+.. image:: ../Images/child_component_a.png
  :alt: Image of an expanded child component
 
 .. note:: In this release, parent and child components are read-only in Studio. You set up components and their relationships to each other in XML. You can then import the course into Studio and verify that your course components are organized as you intended.
@@ -319,7 +319,7 @@ For students, all parent and child components are displayed on the unit page. Th
 
 TO REPLACE WHEN WORKING IN LMS
 
-.. image:: Images/nested_components_student_view.png
+.. image:: ../Images/nested_components_student_view.png
  :alt: Image of the student's view of nested components
 
 .. note:: The visibility of nested components depends on the visibility of the parent unit. The parent unit must be public for students to see nested components. For more information, see :ref:`Visibility of Components Contained by Other Components`.

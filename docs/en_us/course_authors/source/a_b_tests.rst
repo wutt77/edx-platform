@@ -9,6 +9,7 @@ This chapter describes how you can use A/B tests in your course. See:
 * :ref:`Overview of A/B Tests`
 * :ref:`The Course Staff View of A/B Tests`
 * :ref:`The Studio Outline View of A/B Tests`
+* :ref:`Configure the A/B Test Policy`
 * :ref:`Configure the A/B Test in XML`
 
 .. _Overview of A/B Tests:
@@ -34,17 +35,17 @@ The Course Staff View of A/B Tests
 
 When you view a unit that contains an A/B test in the LMS in the Staff view, you use a drop-down list to select a group. The unit page then shows the content for that group of students.
 
-For example, in the following page, Group 0 is selected, and the video component that is configured to show for Group 0 is shown:
+For example, in the following page, Group 0 is selected, and the video component that is configured to show for Group 0 is displayed:
 
 .. image:: Images/a-b-test-lms-group-0.png
  :alt: Image of a unit page with Group 0 selected
 
-You can change the group selection to see the different video that a different group of students sees:
+You can change the group selection to view the video that a different group of students sees:
 
 .. image:: Images/a-b-test-lms-group-2.png
  :alt: Image of a unit page with Group 2 selected
 
-.. note:: The example course content in this chapter use A/B test terminology to make the functionality clear. Typically, you do not want to use terminology in course content that would make students aware of the experiment.
+.. note:: The example course content in this chapter uses A/B test terminology to make the functionality clear. Typically, you do not want to use terminology in course content that would make students aware of the experiment.
 
 .. _The Studio Outline View of A/B Tests:
 
@@ -73,13 +74,49 @@ Click the arrow next to a test component name to expand that test to see its con
 .. image:: Images/a_b_test_child_expanded.png
  :alt: Image of an expanded A/B test component
 
+
+.. _Configure the A/B Test Policy:
+
+******************************
+Configure the A/B Test Policy
+******************************
+
+To configure an A/B test in your course, you start by defining the test policy.
+
+You set the test policy in the ``policy.json`` file in the ``policies`` directory.
+
+The following is an example JSON object that defines the A/B test, with an explanation below.
+
+.. code-block:: json
+
+  "user_partitions": [{"id": 0,
+                       "name": "Name of the Experiment",
+                       "description": "Description of the experiment.",
+                       "version": 1,
+                       "groups": [{"id": 0,
+                                   "name": "Group A",
+                                   "version": 1},
+                                  {"id": 1,
+                                   "name": "Group B",
+                                   "version": 1}]}]
+
+In this example:
+
+* The ``"id": 0`` identifies the experiment. The value is referenced in ``user_partition`` attribute of the ``<split_test>`` element in the for A/B test file.  
+
+* The ``groups`` definition identifies the groups to which students are randomly assigned. Each group ``id`` value is referenced in the ``group_id_to_child`` attribute of the ``<split_test>`` element.
+
+See :ref:`Define the A/B Test Content in the Split Test File` for more information on how the XML for the A/B test uses these settings.
+
+
+
 .. _Configure the A/B Test in XML:
 
 ******************************
 Configure the A/B Test in XML
 ******************************
 
-You work with multiple XML files to configure an A/B test in your course. This section continues the example above and steps through the files involved in the A/B test that shows different videos to different groups of students.
+You work with multiple XML files to configure an A/B test in your course. This section steps through the files involved in an A/B test that shows different content to two different groups of students.
 
 For information about XML courses, see the `edX XML Tutorial <http://edx.readthedocs.org/projects/devdata/en/latest/course_data_formats/course_xml.html>`_.
 
@@ -97,6 +134,9 @@ You reference an A/B test in the file for the subsection in the ``sequential`` d
  </vertical>
  .....
 
+The ``<split_test>`` element's ``url_name`` value references the name of the A/B test file in the ``split_test`` directory.
+
+.. _Define the A/B Test Content in the Split Test File:
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Define the A/B Test Content in the Split Test File
@@ -104,15 +144,40 @@ Define the A/B Test Content in the Split Test File
 
 After you define the A/B test in the sequential file, you define the course content you want to test in the file in the ``split_test`` directory. This is the file referenced in the ``<split_test>`` element in the sequential file, as shown above.
 
-In this file, you add elements for the A/B test content. For this example, you add two elements to compare the two different video files.
+In the A/B test file, you add elements for the A/B test content. For this example, you add two elements to compare the two different video files.
 
 .. code-block:: xml
 
- <split_test url_name="name of the A/B test" user_partition_id="0" 
-          group_id_to_child='{"0": "path to the video file for group 0", 
-          "2": "path to the video file for group 2"}'>
-    <video url_name="name of the video file from group 0"/>
-    <video url_name="name of the video file from group 2"/>
-  </video>
+ <split_test url_name="AB_Test.xml" display_name="A/B Test" user_partition_id="0" 
+             group_id_to_child='{"0": "i4x://path-to-course/vertical/group_a", 
+                                 "1": "i4x://path-to-course/vertical/group_b"}'>
+  <vertical url_name="group_a" display_name="Group A">
+    <html>Welcome to group A.</html>
+    <video url_name="group_a_video"/>
+  </vertical>
+  <vertical url_name="group_b" display_name="Group B">
+    <html>Welcome to group B.</html>
+    <problem display_name="Checkboxes">
+      <p>A checkboxes problem presents checkbox buttons for student input. 
+         Students can select more than one option presented.</p>
+      <choiceresponse>
+	    <checkboxgroup direction="vertical" label="Select the answer that matches">
+	      <choice correct="true">correct</choice>
+	      <choice correct="false">incorrect</choice>
+	      <choice correct="true">correct</choice>
+	    </checkboxgroup>
+      </choiceresponse>
+    </problem>
+  </vertical>
  </split_test>
 
+
+In this example:
+
+* The ``user_partition_id`` value references the ID of the experiment defined in the ``policy.json`` file. 
+
+* The ``group_id_to_child`` value references the IDs of the groups defined in the ``policy.json`` file, and maps the group IDs to specific content.
+
+  For example,  the value for group ``0``, ``i4x://path-to-course/vertical/group_a`` maps to the ``<vertical>`` element with the ``url_name`` equal to ``group_a``.  Therefore, students in group 0 see the content in that vertical.
+
+For information about the ``policy.json`` file, see :ref:`Configure the A/B Test Policy`.

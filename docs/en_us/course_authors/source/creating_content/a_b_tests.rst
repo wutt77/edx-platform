@@ -20,9 +20,11 @@ Overview of A/B Tests
 
 You can set up A/B tests to provide different course content to different groups of students. 
 
-Within a unit, you can specify that a component is part of an A/B test and will be shown to one group of students and not the other.
+Within a unit, you can specify that a component is part of an A/B test and will be shown to one group of students and not other groups.
 
-Students are randomly assigned to content groups. You can then research and compare the performance of students in those groups to gain more insight into the relative effectiveness of your course content.
+Students are randomly assigned to content groups. You cannot control which students are assigned to which group.
+
+You can research and compare the performance of students in those groups to gain more insight into the relative effectiveness of your course content.
 
 .. note:: In the current release, you must configure A/B tests through XML, then import the XML course into edX Studio. You can view A/B tests in Studio, but you cannot create or edit the content of A/B tests directly. See :ref:`Import a Course` for instructions.
 
@@ -102,9 +104,11 @@ The following is an example JSON object that defines the A/B test, with an expla
 
 In this example:
 
-* The ``"id": 0`` identifies the experiment. The value is referenced in ``user_partition`` attribute of the ``<split_test>`` element in the for A/B test file.  
+* The ``"id": 0`` identifies the experiment. The value is referenced in ``user_partition`` attribute of the ``<split_test>`` element in the for A/B test file.  You can configure multiple experiments in your course, with each experiment having its own, independent groups.
 
 * The ``groups`` definition identifies the groups to which students are randomly assigned. Each group ``id`` value is referenced in the ``group_id_to_child`` attribute of the ``<split_test>`` element.
+
+.. note:: The examples in this chapter use two groups in a traditional A/B test. However, you can define any number of groups in the policy file.
 
 See :ref:`Define the A/B Test Content in the Split Test File` for more information on how the XML for the A/B test uses these settings.
 

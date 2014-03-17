@@ -19,9 +19,9 @@ define(["jquery", "underscore", "backbone", "js/utils/handle_iframe_binding"],
             constructor: function(options) {
                 _.bindAll(this, 'beforeRender', 'render', 'afterRender');
                 var _this = this;
-                this.render = _.wrap(this.render, function (render) {
+                this.render = _.wrap(this.render, function (render, options) {
                     _this.beforeRender();
-                    render();
+                    render(options);
                     _this.afterRender();
                     return _this;
                 });

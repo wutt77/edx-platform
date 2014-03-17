@@ -6,11 +6,19 @@ from contentstore.views.helpers import xblock_studio_url
 from django.utils.translation import ugettext as _
 %>
 <%block name="title">${_("Container")}</%block>
-<%block name="bodyclass">is-signedin course container view-container</%block>
+<%block name="bodyclass">is-signedin course container view-container feature-edit-dialog feature-edit-xblock-modal</%block>
 
 <%namespace name='static' file='static_content.html'/>
 <%namespace name="units" file="widgets/units.html" />
 
+
+<%block name="header_extras">
+% for template_name in ["edit-xblock-modal"]:
+<script type="text/template" id="${template_name}-tpl">
+    <%static:include path="js/${template_name}.underscore" />
+</script>
+% endfor
+</%block>
 
 <%block name="jsextra">
 <%
@@ -21,20 +29,33 @@ xblock_info = {
 };
 %>
 <script type='text/javascript'>
-    require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock",
+    require(["domReady!", "jquery", "js/models/xblock_info", "js/views/xblock", "js/views/edit_xblock_modal",
             "js/models/module_info", "coffee/src/views/unit",
             "xmodule", "coffee/src/main", "xblock/cms.runtime.v1",
             "js/views/metadata", "js/collections/metadata"],
-            function(doc, $, XBlockInfo, XBlockView) {
-                var model,
-                    view;
+            function(doc, $, XBlockInfo, XBlockView, EditXBlockModal) {
+                var self = this,
+                    model,
+                    view,
+                    addButtonActions;
+
+                addButtonActions = function() {
+                    $('.edit-button').click(function(event) {
+                        var modal = new EditXBlockModal({el: $('.edit-xblock-modal')});
+                        modal.wrapperXBlock = $(event.target).closest('.wrapper-xblock');
+                        modal.render();
+                        modal.show();
+                        event.preventDefault();
+                    });
+                };
+
                 model = new XBlockInfo(${json.dumps(xblock_info) | n});
                 view = new XBlockView({
                     el: $('.wrapper-xblock.level-page').first(),
                     model: model,
                     view: 'container_preview'
                 });
-                view.render();
+                view.render({ success: addButtonActions });
             });
 </script>
 
@@ -98,5 +119,7 @@ xblock_info = {
         </section>
     </div>
 </div>
+
+<div class="edit-xblock-modal"/>
 
 </%block>

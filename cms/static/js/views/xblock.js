@@ -9,7 +9,7 @@ define(["jquery", "underscore", "js/views/baseview", "xblock/runtime.v1"],
                 this.view = this.options.view;
             },
 
-            render: function() {
+            render: function(options) {
                 var self = this,
                     view = this.view;
                 return $.ajax({
@@ -20,10 +20,14 @@ define(["jquery", "underscore", "js/views/baseview", "xblock/runtime.v1"],
                     },
                     success: function(fragment) {
                         var wrapper = self.$el,
-                            xblock;
+                            xblock,
+                            success = options ? options.success : null;
                         self.renderXBlockFragment(fragment, wrapper);
                         xblock = self.$('.xblock').first();
                         XBlock.initializeBlock(xblock);
+                        if (success) {
+                            success();
+                        }
                     }
                 });
             },

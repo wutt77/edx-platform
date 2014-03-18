@@ -83,7 +83,7 @@ class ContentStoreImportTest(ModuleStoreTestCase):
         # Test that importing course with unicode 'id' and 'display name' doesn't give UnicodeEncodeError
         """
         module_store = modulestore('direct')
-        target_location = Location(['i4x', 'unicode', 'unicode_course', 'course', 'unicode_run'])
+        target_location = Location(['i4x', u'Юникода', 'unicode_course', 'course', u'échantillon'])
         import_from_xml(
             module_store,
             'common/test/data/',

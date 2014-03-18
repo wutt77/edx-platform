@@ -226,7 +226,7 @@ Feature: CMS Video Component Editor
     And I see "Привіт, edX вітає вас." text in the captions
 
   # 18
-  Scenario: Upload "zh" file "A" -> Remove "zh" - Upload "zh" file "B"
+  Scenario: Upload "zh" file "A" -> Remove "zh" -> Upload "zh" file "B"
     Given I have created a Video component
     And I edit the component
     And I open tab "Advanced"

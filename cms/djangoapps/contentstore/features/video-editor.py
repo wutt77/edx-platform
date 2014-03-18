@@ -209,7 +209,7 @@ def upload_transcript_for_lang(step, filename, lang_code):
     container = get_setting_container(lang_code)
 
     if not container:
-        # If translation haven't already uploaded, prepare drop-down and try to find button again
+        # If translation isn't uploaded, prepare drop-down and try to find container again
         choose_new_lang(lang_code)
         container = get_setting_container(lang_code)
 
